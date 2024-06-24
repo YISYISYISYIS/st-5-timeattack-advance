@@ -1,7 +1,29 @@
 import { useNavigate } from "react-router-dom";
+import { todoApi } from "../api/todos";
+import { useQuery } from "@tanstack/react-query";
 
-export default function TodoList({ todos }) {
+export default function TodoList() {
   const navigate = useNavigate();
+
+  const {
+    isPending,
+    error,
+    data: todos,
+  } = useQuery({
+    queryKey: "todos",
+    queryFn: async () => {
+      const response = await todoApi.get(`todos?_sort=-createdAt`);
+      return response.data;
+    },
+  });
+
+  if (isPending) {
+    return <div>로딩중...</div>;
+  }
+
+  if (error) {
+    return <div> 에러{error.message}</div>;
+  }
   return (
     <ul style={{ listStyle: "none", width: 250 }}>
       {todos.map((todo) => (
